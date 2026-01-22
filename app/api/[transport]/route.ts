@@ -2,11 +2,12 @@
  * Clockify MCP Server
  *
  * Provides time tracking capabilities via the Clockify API.
- * Authentication: Set CLOCKIFY_API_KEY environment variable.
+ * Authentication: Pass API key via Authorization header (Bearer token).
  */
 
 import { z } from 'zod';
 import { createMcpHandler } from 'mcp-handler';
+import { headers } from 'next/headers';
 
 export const maxDuration = 60;
 
@@ -16,12 +17,25 @@ export const maxDuration = 60;
 
 const BASE_URL = 'https://api.clockify.me/api/v1';
 
-function getApiKey(): string {
-  const key = process.env.CLOCKIFY_API_KEY;
-  if (!key) {
-    throw new Error('CLOCKIFY_API_KEY environment variable is required');
+async function getApiKey(): Promise<string> {
+  // Try Authorization header first (Bearer token)
+  const headersList = await headers();
+  const authHeader = headersList.get('authorization');
+
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
   }
-  return key;
+
+  // Fall back to environment variable
+  const envKey = process.env.CLOCKIFY_API_KEY;
+  if (envKey) {
+    return envKey;
+  }
+
+  throw new Error(
+    'The Clockify MCP requires a Clockify API key. ' +
+    'Either pass it via Authorization header (Bearer <key>) or set CLOCKIFY_API_KEY environment variable.'
+  );
 }
 
 // ============================================================================
@@ -36,7 +50,7 @@ interface ApiOptions {
 
 async function clockifyApi<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { method = 'GET', body, params } = options;
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
 
   let url = `${BASE_URL}${endpoint}`;
 

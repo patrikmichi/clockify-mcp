@@ -6,10 +6,7 @@ Time tracking via the Clockify API using the Model Context Protocol.
 
 1. Get your Clockify API key from [Clockify Profile Settings](https://app.clockify.me/user/settings)
 
-2. Set the environment variable:
-   ```bash
-   export CLOCKIFY_API_KEY=your-api-key
-   ```
+2. Configure your MCP client with the API key (see MCP Client Configuration below)
 
 3. Deploy to Vercel or run locally:
    ```bash
@@ -82,19 +79,15 @@ Create a new project called "Website Redesign" for client xyz456
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `CLOCKIFY_API_KEY` | Yes | Your Clockify API key |
+| `CLOCKIFY_API_KEY` | No | Fallback API key (if not passed via header) |
 
 ## Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-repo/clockify-mcp)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/patrikmichi/clockify-mcp)
 
-Set `CLOCKIFY_API_KEY` in your Vercel project environment variables.
+No environment variables required - API key is passed via Authorization header.
 
 ## MCP Client Configuration
-
-After deploying to Vercel, configure your MCP client to connect to the server.
-
-### Claude Code / Cursor
 
 Add to your `~/.claude/mcp.json` or project's `.mcp.json`:
 
@@ -102,26 +95,20 @@ Add to your `~/.claude/mcp.json` or project's `.mcp.json`:
 {
   "mcpServers": {
     "clockify": {
-      "url": "https://your-deployment.vercel.app/api/mcp"
-    }
-  }
-}
-```
-
-### With Authentication (if using Vercel Authentication)
-
-```json
-{
-  "mcpServers": {
-    "clockify": {
-      "url": "https://your-deployment.vercel.app/api/mcp",
+      "url": "https://clockify-mcp.vercel.app/api/mcp",
       "headers": {
-        "Authorization": "Bearer your-token"
+        "Authorization": "Bearer YOUR_CLOCKIFY_API_KEY"
       }
     }
   }
 }
 ```
+
+Replace `YOUR_CLOCKIFY_API_KEY` with your actual Clockify API key.
+
+### Security Note
+
+The API key is sent over HTTPS (encrypted in transit). The Authorization header is a standard and secure way to pass credentials. Your API key stays on your machine in mcp.json and is only sent to the MCP server, which forwards it to Clockify.
 
 ### Example mcp.json
 

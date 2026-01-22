@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "clockify": {
-      "url": "https://your-deployment.vercel.app/api/mcp",
+      "url": "https://clockify-mcp.vercel.app/api/mcp",
       "headers": {
-        "Authorization": "Bearer ${CLOCKIFY_API_KEY}"
+        "Authorization": "Bearer YOUR_CLOCKIFY_API_KEY"
       }
     }
   }
